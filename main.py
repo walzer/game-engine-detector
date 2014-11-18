@@ -36,6 +36,9 @@ def main():
 
     d = detector.GameEngineDetector(workspace, args)
     d.run()
+    r = d.get_all_results()
+    for e in r:
+        print("package: " + e["file_name"] + ", engine: " + e["engine"])
 
 if __name__ == '__main__':
     try:
