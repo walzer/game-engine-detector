@@ -8,7 +8,7 @@
     [
         {
             "name": "cocos2d",
-            "file_name_keywords": ["cocos2d"],
+            "file_name_keywords": ["cocos2d", "\\.ccbi"],
             "file_content_keywords": ["CCFileUtils", "cocos2dVersion"],
             "sub_types":
             {
@@ -19,14 +19,14 @@
 
         {
             "name": "unity",
-            "file_name_keywords": ["libunity", "unity3d", "unityengine"],
+            "file_name_keywords": ["libunity\\.so"],
             "file_content_keywords": ["mono_unity", "unity3d", "unityengine"],
             "sub_types": {}
         },
 
         {
-            "name": "flash_Stage3D",
-            "file_name_keywords": [],
+            "name": "flash",
+            "file_name_keywords": ["\\.swf"],
             "file_content_keywords": ["AIRStage3D"],
             "sub_types": {}
         }
