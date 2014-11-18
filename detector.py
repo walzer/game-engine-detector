@@ -72,6 +72,10 @@ class GameEngineDetector:
                 if re.search(keyword, path):
                     self.result["engine"] = engine["name"]
                     self.result["matched_file_name_keywords"].add(keyword)
+                    if keyword.find("lua") != -1:
+                        self.result["sub_type"] = "lua"
+                    if keyword.find("js") != -1:
+                        self.result["sub_type"] = "js"
 
             if self.result["engine"] != "unknown":
                 found = True

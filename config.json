@@ -8,7 +8,7 @@
     [
         {
             "name": "cocos2d",
-            "file_name_keywords": ["cocos2d", "\\.ccbi"],
+            "file_name_keywords": ["cocos2dlua", "cocos2djs", "\\.ccbi"],
             "file_content_keywords": ["CCFileUtils", "cocos2dVersion"],
             "sub_types":
             {
