@@ -1,0 +1,34 @@
+{
+    "package_dirs":
+    [
+        "packages"
+    ],
+
+    "engines":
+    [
+        {
+            "name": "cocos2d",
+            "file_name_keywords": ["cocos2d"],
+            "file_content_keywords": ["CCFileUtils", "cocos2dVersion"],
+            "sub_types":
+            {
+                "lua": ["CCLuaEngine", "LuaEngine"],
+                "js": ["ScriptingCore"]
+            }
+        },
+
+        {
+            "name": "unity",
+            "file_name_keywords": ["libunity", "unity3d", "unityengine"],
+            "file_content_keywords": ["mono_unity", "unity3d", "unityengine"],
+            "sub_types": {}
+        },
+
+        {
+            "name": "flash_Stage3D",
+            "file_name_keywords": [],
+            "file_content_keywords": ["AIRStage3D"],
+            "sub_types": {}
+        }
+    ]
+}
