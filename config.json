@@ -8,8 +8,8 @@
     [
         {
             "name": "cocos2d",
-            "file_name_keywords": ["cocos2d", "cocos2dlua", "cocos2djs", "\\.ccbi"],
-            "file_content_keywords": ["CCFileUtils", "cocos2dVersion"],
+            "file_name_keywords": ["cocos2d"],
+            "file_content_keywords": ["CCFileUtils", "cocos2dVersion", "cocos2d"],
             "sub_types":
             {
                 "lua": ["CCLuaEngine", "LuaEngine"],
