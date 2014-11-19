@@ -80,9 +80,6 @@ class GameEngineDetector:
                 found = True
                 break
 
-        if found:
-            print("RESULT: " + str(self.result))
-
         return found
 
     def _check_executable_file(self, path, chunksize = 8192):

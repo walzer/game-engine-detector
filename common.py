@@ -7,7 +7,7 @@ import subprocess
 
 def unzip_package(file_path, out_dir):
     with open(file_path, 'rb') as f:
-        ret = subprocess.call(['7z', 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
+        ret = subprocess.call(['./lib/7z-mac/7z', 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
     return ret
 
 def to_absolute_path(basePath, relativePath):
