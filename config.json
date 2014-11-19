@@ -26,11 +26,12 @@
 
         {
             "name": "flash",
-            "file_name_keywords": ["[Ff]lash", "\\.swf"],
+            "file_name_keywords": ["[Ff]lash"],
             "file_content_keywords": [],
             "sub_types":
             {
-                "Stage3D": ["AIRStage3D"]
+                "Stage3D": ["AIRStage3D"],
+                "ActionScript": ["ActionScript"]
             }
         }
     ]
