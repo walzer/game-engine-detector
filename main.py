@@ -26,19 +26,18 @@ def main():
     if opts.config_file is None:
         opts.config_file = "config.json"
 
-    if not os.path.isabs(opts.config_file):
-        opts.config_file = os.path.join(workspace, opts.config_file)
-
-    args = common.read_object_from_json_file(opts.config_file)
-    # print("config:" + str(args))
-    # print(common.re_test(args["files_in_apk"], "assets/xxx.png"))
-    # print(common.re_test(args["files_in_apk"], "assets/xxx/yyy.png"))
-
-    d = detector.GameEngineDetector(workspace, args)
+    d = detector.GameEngineDetector(workspace, opts.config_file)
     d.run()
     r = d.get_all_results()
     for e in r:
-        print("package: " + e["file_name"] + ", engine: " + e["engine"])
+        str = "package: " + e["file_name"] + ", engine: " + e["engine"]
+        if e["sub_type"]:
+            str += ", subtype: " + e["sub_type"]
+
+        if len(e["error_info"]) > 0:
+            str += ", error info: " + e["error_info"]
+
+        print(str)
 
 if __name__ == '__main__':
     try:

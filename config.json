@@ -26,9 +26,12 @@
 
         {
             "name": "flash",
-            "file_name_keywords": ["\\.swf"],
-            "file_content_keywords": ["AIRStage3D"],
-            "sub_types": {}
+            "file_name_keywords": ["[Ff]lash", "\\.swf"],
+            "file_content_keywords": [],
+            "sub_types":
+            {
+                "Stage3D": ["AIRStage3D"]
+            }
         }
     ]
 }

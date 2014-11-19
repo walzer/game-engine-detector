@@ -7,21 +7,21 @@ import re
 TAG = "GameEngineDetector: "
 
 class GameEngineDetector:
-    def __init__(self, workspace, opts):
+    def __init__(self, workspace, config_file_path):
         "Constructor"
 
-        print(TAG + str(opts))
         self.workspace = workspace
+
+        if not os.path.isabs(config_file_path):
+            config_file_path = os.path.join(self.workspace, config_file_path)
+
+        opts = common.read_object_from_json_file(config_file_path)
+
+        print(TAG + str(opts))
+
         self.temp_dir = os.path.join(self.workspace, "temp")
         self._reset_result()
         self.all_results = []
-
-        # Remove temporary directory
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
-        # Re-create the temporary directory, it's an empty directory now
-        os.mkdir(self.temp_dir)
-
         self.package_dirs = opts["package_dirs"]
         self._normalize_package_dirs()
 
@@ -34,7 +34,8 @@ class GameEngineDetector:
             "matched_file_name_keywords": set(),
             "matched_content_keywords": set(),
             "sub_type": "",
-            "matched_sub_type_keywords": set()
+            "matched_sub_type_keywords": set(),
+            "error_info": ""
         }
         return
 
@@ -58,6 +59,7 @@ class GameEngineDetector:
                 if re.search(keyword, chunk):
                     #print("==> FOUND sub type ( %s )" % v)
                     # FIXME: Check wether the type would be changed
+                    self.result["engine"] = engine["name"]
                     self.result["sub_type"] = k
                     self.result["matched_sub_type_keywords"].add(keyword)
 
@@ -69,13 +71,10 @@ class GameEngineDetector:
             #print("==> Checking whether the game is made by " + engine["name"])
 
             for keyword in engine["file_name_keywords"]:
+                # Ignore case
                 if re.search(keyword, path):
                     self.result["engine"] = engine["name"]
                     self.result["matched_file_name_keywords"].add(keyword)
-                    if keyword.find("lua") != -1:
-                        self.result["sub_type"] = "lua"
-                    if keyword.find("js") != -1:
-                        self.result["sub_type"] = "js"
 
             if self.result["engine"] != "unknown":
                 found = True
@@ -89,8 +88,7 @@ class GameEngineDetector:
     def _check_executable_file(self, path, chunksize = 8192):
         #print("==> Checking executable file ( %s )" % path)
 
-        if self._check_file_name(path):
-            return True
+        self._check_file_name(path)
 
         found = False
 
@@ -126,25 +124,25 @@ class GameEngineDetector:
 
         if 0 != common.unzip_package(pkg_path, out_dir):
             print("==> ERROR: unzip package ( %s ) failed!" % file_name)
-            return
-
-        thiz = self
-        def callback(path, is_dir):
-            if is_dir:
-                return False
-            if path.endswith(".so"):
-                if thiz._check_executable_file(path):
-                    return True
-
-            if not is_apk:
-                if not path.endswith(".png") \
-                    and not path.endswith(".jpg") \
-                    and not path.endswith(".plist"):
+            self.result["error_info"] = "Unzip package failed"
+        else:
+            thiz = self
+            def callback(path, is_dir):
+                if is_dir:
+                    return False
+                if path.endswith(".so"):
                     if thiz._check_executable_file(path):
                         return True
-            return False
 
-        common.deep_iterate_dir(out_dir, callback)
+                if not is_apk:
+                    if not path.endswith(".png") \
+                        and not path.endswith(".jpg") \
+                        and not path.endswith(".plist"):
+                        if thiz._check_executable_file(path):
+                            return True
+                return False
+
+            common.deep_iterate_dir(out_dir, callback)
 
         self.result["file_name"] = file_name
         self.all_results.append(self.result)
@@ -162,19 +160,25 @@ class GameEngineDetector:
         return False
 
     def run(self):
+        self.clean()
+        # Re-create the temporary directory, it's an empty directory now
+        os.mkdir(self.temp_dir)
 
         for d in self.package_dirs:
             common.deep_iterate_dir(d, self._iteration_callback)
 
-        # self.clean()
+        self.clean()
         print("==> DONE!")
         return
 
     def clean(self):
         print("==> Cleaning ...")
         # Remove temporary directory
-        shutil.rmtree(self.temp_dir)
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
         self._reset_result()
+
         return
 
     def get_all_results(self):
