@@ -56,12 +56,20 @@ def result_csv_output(result, output_path):
 
     with open(output_path, "wb") as f:
         csv_writer = csv.writer(f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow(["File", "Engine", "Subtype"])
+        csv_writer.writerow(["File", "Engine", "Subtypes"])
         for e in result:
             if len(e["error_info"]) > 0:
                 engine = e["error_info"]
             else:
                 engine = e["engine"]
 
-            csv_writer.writerow([e["file_name"].encode("utf-8"), engine, e["sub_type"]])
+            sub_types = ""
+            for sub_type in e["sub_types"]:
+                sub_types += sub_type + ","
+
+            # Remove the last ','
+            if len(sub_types) > 0:
+                sub_types = sub_types[0:-1]
+
+            csv_writer.writerow([e["file_name"].encode("utf-8"), engine, sub_types])
             f.flush()

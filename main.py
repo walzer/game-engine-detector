@@ -15,7 +15,7 @@ def main():
 
     from optparse import OptionParser
 
-    parser = OptionParser(usage="./main.py csv_path")
+    parser = OptionParser(usage="./main.py -o csv_path")
 
     parser.add_option("-c", "--configfile",
                       action="store", type="string", dest="config_file", default=None,
@@ -25,9 +25,13 @@ def main():
                       action="store", type="string", dest="seven_zip_path", default=None,
                       help="7z path")
 
-    parser.add_option("-p", "--pkg_dir",
+    parser.add_option("-p", "--pkg-dir",
                       action="store", type="string", dest="pkg_dir", default=None,
                       help="Directory that contains packages")
+
+    parser.add_option("-o", "--out-file",
+                      action="store", type="string", dest="out_file", default=None,
+                      help="The result file")
 
     (opts, args) = parser.parse_args()
 
@@ -45,7 +49,12 @@ def main():
     d.run()
     r = d.get_all_results()
 
-    common.result_csv_output(r, args[0])
+    out_file_name = os.path.join(workspace, "result.csv")
+
+    if opts.out_file:
+        out_file_name = opts.out_file
+
+    common.result_csv_output(r, out_file_name)
 
     for e in r:
         str = "package: " + e["file_name"] + ", engine: " + e["engine"]
