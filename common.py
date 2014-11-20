@@ -65,7 +65,7 @@ def result_csv_output(result, output_path):
                              "matched_content_keywords"])
         for e in result:
             if len(e["error_info"]) > 0:
-                engine = e["error_info"]
+                engine = ", ".join(e["error_info"])
             else:
                 engine = e["engine"]
 
