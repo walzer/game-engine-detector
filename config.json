@@ -62,7 +62,8 @@
             "sub_types":
             {
                 "Stage3D": ["AIRStage3D"],
-                "ActionScript": ["ActionScript"]
+                "ActionScript": ["ActionScript"],
+                "FlashAir": ["flash air", "flash_air", "flashair"]
             }
         }
     ]
