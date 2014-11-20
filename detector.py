@@ -29,19 +29,21 @@ class PackageScanner:
         if self.prev_engine_name and self.prev_engine_name != name:
             self.result["error_info"].append("Previous check result is (%s), but now is (%s), please check config.json")
 
-    def _check_chunk(self, chunk, engine):
+    def _check_chunk(self, path, chunk, engine):
         "@return True if we could confirm the engine type"
 
         for keyword in engine["file_content_keywords"]:
             if re.search(keyword, chunk):
                 #print("==> FOUND (engine: %s, keyword: %s)" % (engine["name"], keyword))
                 self._set_engine_name(engine["name"])
+                self.result["matched_content_file_name"] = path
                 self.result["matched_content_keywords"].add(keyword)
 
         for (k, v) in engine["sub_types"].items():
             for keyword in v:
                 if re.search(keyword, chunk):
                     #print("==> FOUND sub type ( %s )" % v)
+                    self.result["matched_content_file_name"] = path
                     self._set_engine_name(engine["name"])
                     self.result["sub_types"].add(k)
                     self.result["matched_sub_type_keywords"].add(keyword)
@@ -77,7 +79,7 @@ class PackageScanner:
                 while True:
                     chunk = f.read(chunksize)
                     if chunk:
-                        self._check_chunk(chunk, engine)
+                        self._check_chunk(path, chunk, engine)
                     else:
                         break
 
@@ -96,6 +98,7 @@ class PackageScanner:
             "file_name": self.file_name,
             "engine": "unknown",
             "matched_file_name_keywords": set(),
+            "matched_content_file_name": "",
             "matched_content_keywords": set(),
             "sub_types": set(),
             "matched_sub_type_keywords": set(),
@@ -122,6 +125,7 @@ class GameEngineDetector:
 
         self.engines = opts["engines"]
         self.package_dirs = opts["package_dirs"]
+        self.package_suffixes = opts["package_suffixes"]
         self._normalize_package_dirs()
         self.check_file_content_keywords = opts["check_file_content_keywords"]
         self.no_need_to_check_file_content = opts["no_need_to_check_file_content"]
@@ -149,10 +153,10 @@ class GameEngineDetector:
                 return True
         return False
 
-    def _scan_package(self, pkg_path, is_apk):
+    def _scan_package(self, pkg_path):
 
         file_name = os.path.split(pkg_path)[-1]
-        print("==> Scanning apk file ( %s )" % file_name)
+        print("==> Scanning package ( %s )" % file_name)
         print("==> Unzip package ...")
         out_dir = os.path.join(self.temp_dir, file_name)
         os.mkdir(out_dir)
@@ -180,11 +184,9 @@ class GameEngineDetector:
 
 
     def _iteration_callback(self, path, is_dir):
-        # print(path + ", is_dir:" + str(is_dir))
-        if path.endswith(".apk"):
-            self._scan_package(path, True)
-        elif path.endswith(".ipa"):
-            self._scan_package(path, False)
+        for suffix in self.package_suffixes:
+            if path.endswith(suffix):
+                self._scan_package(path)
 
         return False
 

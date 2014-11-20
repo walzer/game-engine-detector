@@ -39,6 +39,8 @@ def main():
             for err in e["error_info"]:
                 str += ", error info: " + err
 
+        str += "matched:" + e["matched_content_file_name"]
+
         print(str)
 
 if __name__ == '__main__':
