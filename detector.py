@@ -16,9 +16,9 @@ class PackageScanner:
         self._reset_result()
         return
 
-    def unzip_package(self, pkg_path, out_dir):
+    def unzip_package(self, pkg_path, out_dir, seven_zip_path):
 
-        ret = common.unzip_package(pkg_path, out_dir)
+        ret = common.unzip_package(pkg_path, out_dir, seven_zip_path)
         if 0 != ret:
             print("==> ERROR: unzip package ( %s ) failed!" % self.file_name)
             self.result["error_info"].append("Unzip package failed")
@@ -108,16 +108,12 @@ class PackageScanner:
 
 
 class GameEngineDetector:
-    def __init__(self, workspace, config_file_path):
+    def __init__(self, workspace, opts):
         "Constructor"
 
         self.workspace = workspace
+        self.opts = opts
         self.all_results = []
-
-        if not os.path.isabs(config_file_path):
-            config_file_path = os.path.join(self.workspace, config_file_path)
-
-        opts = common.read_object_from_json_file(config_file_path)
 
         print(TAG + str(opts))
 
@@ -163,7 +159,7 @@ class GameEngineDetector:
 
         scanner = PackageScanner(self.engines, file_name)
 
-        if 0 == scanner.unzip_package(pkg_path, out_dir):
+        if 0 == scanner.unzip_package(pkg_path, out_dir, self.opts["7z_path"]):
             def callback(path, is_dir):
                 if is_dir:
                     return False
