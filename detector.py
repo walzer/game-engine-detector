@@ -7,15 +7,11 @@ import re
 TAG = "GameEngineDetector: "
 
 class GameEngineDetector:
-    def __init__(self, workspace, config_file_path):
+    def __init__(self, workspace, opts):
         "Constructor"
 
         self.workspace = workspace
-
-        if not os.path.isabs(config_file_path):
-            config_file_path = os.path.join(self.workspace, config_file_path)
-
-        opts = common.read_object_from_json_file(config_file_path)
+        self.opts = opts
 
         print(TAG + str(opts))
 
@@ -119,7 +115,7 @@ class GameEngineDetector:
         out_dir = os.path.join(self.temp_dir, file_name)
         os.mkdir(out_dir)
 
-        if 0 != common.unzip_package(pkg_path, out_dir):
+        if 0 != common.unzip_package(pkg_path, out_dir, self.opts["7z_path"]):
             print("==> ERROR: unzip package ( %s ) failed!" % file_name)
             self.result["error_info"] = "Unzip package failed"
         else:
