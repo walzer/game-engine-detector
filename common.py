@@ -5,9 +5,12 @@ import os
 import subprocess
 
 
-def unzip_package(file_path, out_dir):
+def unzip_package(file_path, out_dir, seven_zip_path=None):
+    if not seven_zip_path:
+        seven_zip_path = './lib/7z-mac/7z'
+
     with open(file_path, 'rb') as f:
-        ret = subprocess.call(['./lib/7z-mac/7z', 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
+        ret = subprocess.call([seven_zip_path, 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
     return ret
 
 def to_absolute_path(basePath, relativePath):
@@ -29,12 +32,13 @@ def deep_iterate_dir(rootDir, callback, to_iter=True):
         path = os.path.join(rootDir, lists)
         if os.path.isdir(path):
             if not to_iter:
-                return False
-            if not callback(path, True):
+                print("*** Skip sub directory: " + path)
+                continue
+            if callback(path, True):
+                return True
+            else:
                 if deep_iterate_dir(path, callback, to_iter):
                     return True
-            else:
-                return True
         elif os.path.isfile(path):
             if callback(path, False):
                 return True
@@ -47,3 +51,30 @@ def re_test(args, path_in_apk):
             if re.search(f, path_in_apk):
                 return True
     return False
+
+
+def result_csv_output(result, output_path):
+    import csv
+
+    with open(output_path, "wb") as f:
+        csv_writer = csv.writer(f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(["File",
+                             "Engine",
+                             "Subtypes",
+                             "matched_content_file_name",
+                             "matched_content_keywords"])
+        for e in result:
+            if len(e["error_info"]) > 0:
+                engine = ", ".join(e["error_info"])
+            else:
+                engine = e["engine"]
+
+            sub_types = ", ".join(e["sub_types"])
+            matched_content_keywords = ",".join(e["matched_content_keywords"])
+
+            csv_writer.writerow([e["file_name"].encode("utf-8"),
+                                 engine.encode("utf-8"),
+                                 sub_types.encode("utf-8"),
+                                 e["matched_content_file_name"].encode("utf-8"),
+                                 matched_content_keywords.encode("utf-8")])
+            f.flush()

@@ -25,6 +25,12 @@
         "[^/]+\\.plist$",
         "[^/]+\\.caf",
         "[^/]+\\.pvr",
+        "[^/]+\\.swf",
+        "[^/]+\\.json",
+        "[^/]+\\.txt",
+        "[^/]+\\.mp3",
+        "[^/]+\\.ogg",
+        "[^/]+\\.wav",
         "PkgInfo$",
         "iTunesArtwork$"
     ],
@@ -33,7 +39,6 @@
     [
         {
             "name": "cocos2d",
-            "exe_file_keywords": [],
             "file_name_keywords": ["cocos2d"],
             "file_content_keywords": ["CCFileUtils", "cocos2dVersion", "cocos2d"],
             "sub_types":
@@ -46,18 +51,19 @@
         {
             "name": "unity",
             "file_name_keywords": ["libunity\\.so"],
-            "file_content_keywords": ["mono_unity", "unity3d", "Unity3D", "UnityEngine", "unityengine", "UnityScript"],
+            "file_content_keywords": ["mono_unity", "unity3d", "unityengine", "unityscript"],
             "sub_types": {}
         },
 
         {
             "name": "flash",
-            "file_name_keywords": ["[Ff]lash.*\\.so"],
+            "file_name_keywords": ["flash.*\\.so"],
             "file_content_keywords": [],
             "sub_types":
             {
                 "Stage3D": ["AIRStage3D"],
-                "ActionScript": ["ActionScript"]
+                "ActionScript": ["ActionScript"],
+                "FlashAir": ["flash air", "flash_air", "flashair"]
             }
         }
     ]

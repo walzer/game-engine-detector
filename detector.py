@@ -8,17 +8,18 @@ TAG = "GameEngineDetector: "
 
 
 class PackageScanner:
-    def __init__(self, engines, file_name):
+    def __init__(self, workspace, engines, file_name):
         self.result = None
+        self.workspace = workspace
         self.engines = engines
         self.file_name = file_name
         self.prev_engine_name = None
         self._reset_result()
         return
 
-    def unzip_package(self, pkg_path, out_dir):
+    def unzip_package(self, pkg_path, out_dir, seven_zip_path):
 
-        ret = common.unzip_package(pkg_path, out_dir)
+        ret = common.unzip_package(pkg_path, out_dir, seven_zip_path)
         if 0 != ret:
             print("==> ERROR: unzip package ( %s ) failed!" % self.file_name)
             self.result["error_info"].append("Unzip package failed")
@@ -29,24 +30,39 @@ class PackageScanner:
         if self.prev_engine_name and self.prev_engine_name != name:
             self.result["error_info"].append("Previous check result is (%s), but now is (%s), please check config.json")
 
+    def _remove_prefix(self, path):
+        pos = path.find(self.workspace)
+        if pos != -1:
+            return path[len(self.workspace):]
+        return path
+
     def _check_chunk(self, path, chunk, engine):
         "@return True if we could confirm the engine type"
+        ret = False
+        chunk = chunk.lower()
 
         for keyword in engine["file_content_keywords"]:
+            keyword = keyword.lower()
             if re.search(keyword, chunk):
                 #print("==> FOUND (engine: %s, keyword: %s)" % (engine["name"], keyword))
                 self._set_engine_name(engine["name"])
-                self.result["matched_content_file_name"] = path
+                self.result["matched_content_file_name"] = self._remove_prefix(path)
                 self.result["matched_content_keywords"].add(keyword)
+                ret = True
 
         for (k, v) in engine["sub_types"].items():
             for keyword in v:
+                keyword = keyword.lower()
                 if re.search(keyword, chunk):
+
                     #print("==> FOUND sub type ( %s )" % v)
-                    self.result["matched_content_file_name"] = path
                     self._set_engine_name(engine["name"])
+                    self.result["matched_content_file_name"] = self._remove_prefix(path)
                     self.result["sub_types"].add(k)
                     self.result["matched_sub_type_keywords"].add(keyword)
+                    ret = True
+
+        return ret
 
 
     def check_file_name(self, path):
@@ -56,7 +72,6 @@ class PackageScanner:
             #print("==> Checking whether the game is made by " + engine["name"])
 
             for keyword in engine["file_name_keywords"]:
-                # Ignore case
                 if re.search(keyword, path):
                     self._set_engine_name(engine["name"])
                     self.result["matched_file_name_keywords"].add(keyword)
@@ -67,7 +82,7 @@ class PackageScanner:
 
         return found
 
-    def check_file_content(self, path, chunksize = 8192):
+    def check_file_content(self, path, chunk_size=81920):
         #print("==> Checking executable file ( %s )" % path)
 
         found = False
@@ -77,18 +92,17 @@ class PackageScanner:
 
             with open(path, "rb") as f:
                 while True:
-                    chunk = f.read(chunksize)
+                    chunk = f.read(chunk_size)
                     if chunk:
-                        self._check_chunk(path, chunk, engine)
+                        ret = self._check_chunk(path, chunk, engine)
+                        if not found and ret:
+                            found = True
                     else:
                         break
 
-            if self.result["engine"] != "unknown":
-                found = True
+            if found:
+                print("RESULT: " + str(self.result))
                 break
-
-        if found:
-            print("RESULT: " + str(self.result))
 
         return found
 
@@ -108,16 +122,12 @@ class PackageScanner:
 
 
 class GameEngineDetector:
-    def __init__(self, workspace, config_file_path):
+    def __init__(self, workspace, opts):
         "Constructor"
 
         self.workspace = workspace
+        self.opts = opts
         self.all_results = []
-
-        if not os.path.isabs(config_file_path):
-            config_file_path = os.path.join(self.workspace, config_file_path)
-
-        opts = common.read_object_from_json_file(config_file_path)
 
         print(TAG + str(opts))
 
@@ -149,7 +159,7 @@ class GameEngineDetector:
         for keyword in self.check_file_content_keywords:
             m = re.search(keyword, path)
             if m:
-                print("==> Found file to check content: (%s)" % m.group(0))
+                #print("==> Found file to check content: (%s)" % m.group(0))
                 return True
         return False
 
@@ -161,9 +171,9 @@ class GameEngineDetector:
         out_dir = os.path.join(self.temp_dir, file_name)
         os.mkdir(out_dir)
 
-        scanner = PackageScanner(self.engines, file_name)
+        scanner = PackageScanner(self.workspace, self.engines, file_name)
 
-        if 0 == scanner.unzip_package(pkg_path, out_dir):
+        if 0 == scanner.unzip_package(pkg_path, out_dir, self.opts["7z_path"]):
             def callback(path, is_dir):
                 if is_dir:
                     return False
@@ -196,7 +206,7 @@ class GameEngineDetector:
         os.mkdir(self.temp_dir)
 
         for d in self.package_dirs:
-            common.deep_iterate_dir(d, self._iteration_callback)
+            common.deep_iterate_dir(d, self._iteration_callback, False)
 
         self.clean()
         print("==> DONE!")
