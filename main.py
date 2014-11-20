@@ -57,10 +57,10 @@ def main():
     common.result_csv_output(r, out_file_name)
 
     for e in r:
-        str = "package: " + e["file_name"] + ", engine: " + e["engine"]
+        str = "package: " + e["file_name"] + ", engine: " + e["engine"] + ", "
         if e["sub_types"]:
             for sub_type in e["sub_types"]:
-                str += ", subtype: " + sub_type
+                str += "subtype: " + sub_type + ", "
 
         if len(e["error_info"]) > 0:
             for err in e["error_info"]:

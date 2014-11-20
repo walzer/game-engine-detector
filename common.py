@@ -32,12 +32,13 @@ def deep_iterate_dir(rootDir, callback, to_iter=True):
         path = os.path.join(rootDir, lists)
         if os.path.isdir(path):
             if not to_iter:
-                return False
-            if not callback(path, True):
+                print("*** Skip sub directory: " + path)
+                continue
+            if callback(path, True):
+                return True
+            else:
                 if deep_iterate_dir(path, callback, to_iter):
                     return True
-            else:
-                return True
         elif os.path.isfile(path):
             if callback(path, False):
                 return True
@@ -51,25 +52,29 @@ def re_test(args, path_in_apk):
                 return True
     return False
 
+
 def result_csv_output(result, output_path):
     import csv
 
     with open(output_path, "wb") as f:
         csv_writer = csv.writer(f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow(["File", "Engine", "Subtypes"])
+        csv_writer.writerow(["File",
+                             "Engine",
+                             "Subtypes",
+                             "matched_content_file_name",
+                             "matched_content_keywords"])
         for e in result:
             if len(e["error_info"]) > 0:
                 engine = e["error_info"]
             else:
                 engine = e["engine"]
 
-            sub_types = ""
-            for sub_type in e["sub_types"]:
-                sub_types += sub_type + ","
+            sub_types = ", ".join(e["sub_types"])
+            matched_content_keywords = ", ".join(e["matched_content_keywords"])
 
-            # Remove the last ','
-            if len(sub_types) > 0:
-                sub_types = sub_types[0:-1]
-
-            csv_writer.writerow([e["file_name"].encode("utf-8"), engine, sub_types])
+            csv_writer.writerow([e["file_name"].encode("utf-8"),
+                                 engine,
+                                 sub_types,
+                                 e["matched_content_file_name"],
+                                 matched_content_keywords])
             f.flush()

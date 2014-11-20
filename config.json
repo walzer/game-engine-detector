@@ -25,6 +25,9 @@
         "[^/]+\\.plist$",
         "[^/]+\\.caf",
         "[^/]+\\.pvr",
+        "[^/]+\\.swf",
+        "[^/]+\\.json",
+        "[^/]+\\.txt",
         "PkgInfo$",
         "iTunesArtwork$"
     ],
@@ -45,13 +48,13 @@
         {
             "name": "unity",
             "file_name_keywords": ["libunity\\.so"],
-            "file_content_keywords": ["mono_unity", "unity3d", "Unity3D", "UnityEngine", "unityengine", "UnityScript"],
+            "file_content_keywords": ["mono_unity", "unity3d", "unityengine", "unityscript"],
             "sub_types": {}
         },
 
         {
             "name": "flash",
-            "file_name_keywords": ["[Ff]lash.*\\.so"],
+            "file_name_keywords": ["flash.*\\.so"],
             "file_content_keywords": [],
             "sub_types":
             {
