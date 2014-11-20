@@ -159,7 +159,7 @@ class GameEngineDetector:
         for keyword in self.check_file_content_keywords:
             m = re.search(keyword, path)
             if m:
-                print("==> Found file to check content: (%s)" % m.group(0))
+                #print("==> Found file to check content: (%s)" % m.group(0))
                 return True
         return False
 
