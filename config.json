@@ -50,7 +50,7 @@
 
         {
             "name": "unity",
-            "file_name_keywords": ["libunity\\.so"],
+            "file_name_keywords": ["libunity\\.so", "unity3d", "unityengine", "unityscript"],
             "file_content_keywords": ["mono_unity", "unity3d", "unityengine", "unityscript"],
             "sub_types": {}
         },
@@ -65,6 +65,20 @@
                 "ActionScript": ["ActionScript"],
                 "FlashAir": ["flash air", "flash_air", "flashair"]
             }
+        },
+
+        {
+            "name": "Unreal",
+            "file_name_keywords": ["libUE4.so", "UE4Game"],
+            "file_content_keywords": ["UProjectileMovementComponent", "UPrimitiveComponent", "UE4Game"],
+            "sub_types": {}
+        },
+
+        {
+            "name": "libgdx",
+            "file_name_keywords": ["libgdx.so"],
+            "file_content_keywords": ["com_badlogic_gdx"],
+            "sub_types": {}
         }
     ]
 }
