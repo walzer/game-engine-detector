@@ -31,11 +31,13 @@ def main():
     r = d.get_all_results()
     for e in r:
         str = "package: " + e["file_name"] + ", engine: " + e["engine"]
-        if e["sub_type"]:
-            str += ", subtype: " + e["sub_type"]
+        if e["sub_types"]:
+            for sub_type in e["sub_types"]:
+                str += ", subtype: " + sub_type
 
         if len(e["error_info"]) > 0:
-            str += ", error info: " + e["error_info"]
+            for err in e["error_info"]:
+                str += ", error info: " + err
 
         print(str)
 

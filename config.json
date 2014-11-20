@@ -4,10 +4,29 @@
         "packages"
     ],
 
+    "check_file_content_keywords":
+    [
+        "[^/]+\\.so$",
+        "[^/]+\\.app/[^/]+$"
+    ],
+
+    "no_need_to_check_file_content":
+    [
+        "[^/]+\\.png$",
+        "[^/]+\\.jpg$",
+        "[^/]+\\.jpeg$",
+        "[^/]+\\.plist$",
+        "[^/]+\\.caf",
+        "[^/]+\\.pvr",
+        "PkgInfo$",
+        "iTunesArtwork$"
+    ],
+
     "engines":
     [
         {
             "name": "cocos2d",
+            "exe_file_keywords": [],
             "file_name_keywords": ["cocos2d"],
             "file_content_keywords": ["CCFileUtils", "cocos2dVersion", "cocos2d"],
             "sub_types":

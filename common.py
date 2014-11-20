@@ -23,13 +23,15 @@ def read_object_from_json_file(jsonFilePath):
     return ret
 
 
-# Returns True of callback indicates no need to iterate
-def deep_iterate_dir(rootDir, callback):
+# Returns True of callback indicates to stop iteration
+def deep_iterate_dir(rootDir, callback, to_iter=True):
     for lists in os.listdir(rootDir):
         path = os.path.join(rootDir, lists)
         if os.path.isdir(path):
+            if not to_iter:
+                return False
             if not callback(path, True):
-                if deep_iterate_dir(path, callback):
+                if deep_iterate_dir(path, callback, to_iter):
                     return True
             else:
                 return True
