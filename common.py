@@ -72,9 +72,9 @@ def result_csv_output(result, output_path):
             sub_types = ", ".join(e["sub_types"])
             matched_content_keywords = ",".join(e["matched_content_keywords"])
 
-            csv_writer.writerow([e["file_name"].encode("utf-8"),
+            csv_writer.writerow([e["file_name"],
                                  engine.encode("utf-8"),
                                  sub_types.encode("utf-8"),
-                                 e["matched_content_file_name"].encode("utf-8"),
-                                 matched_content_keywords.encode("utf-8")])
+                                 e["matched_content_file_name"],
+                                 matched_content_keywords])
             f.flush()

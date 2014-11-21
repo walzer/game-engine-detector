@@ -195,7 +195,7 @@ class GameEngineDetector:
 
     def _iteration_callback(self, path, is_dir):
         for suffix in self.package_suffixes:
-            if path.endswith(suffix):
+            if path.endswith(suffix.encode("utf-8")):
                 self._scan_package(path)
 
         return False

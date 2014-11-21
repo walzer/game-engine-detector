@@ -57,7 +57,7 @@ def main():
     common.result_csv_output(r, out_file_name)
 
     for e in r:
-        str = "package: " + e["file_name"] + ", engine: " + e["engine"] + ", "
+        str = "package: " + e["file_name"].decode("utf-8") + ", engine: " + e["engine"] + ", "
         if e["sub_types"]:
             for sub_type in e["sub_types"]:
                 str += "subtype: " + sub_type + ", "
@@ -66,7 +66,7 @@ def main():
             for err in e["error_info"]:
                 str += ", error info: " + err
 
-        str += "matched:" + e["matched_content_file_name"]
+        str += "matched:" + e["matched_content_file_name"].decode("utf-8")
 
         print(str)
 
