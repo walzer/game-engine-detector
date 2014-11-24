@@ -43,7 +43,7 @@ def main():
     cfg["7z_path"]= opts.seven_zip_path
 
     if opts.pkg_dir is not None:
-        cfg["package_dirs"]= [opts.pkg_dir]
+        cfg["package_dirs"]= [opts.pkg_dir.decode("utf-8")]
 
     d = detector.GameEngineDetector(workspace, cfg)
     d.run()
