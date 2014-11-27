@@ -79,6 +79,13 @@
             "file_name_keywords": ["libgdx.so"],
             "file_content_keywords": ["com_badlogic_gdx"],
             "sub_types": {}
+        },
+
+        {
+            "name": "egret",
+            "file_name_keywords": [],
+            "file_content_keywords": ["egretframeworknative", "EGTTexture"],
+            "sub_types": {}
         }
     ]
 }
