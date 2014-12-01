@@ -1,16 +1,31 @@
 #!/usr/bin/env python
+#coding=utf-8
 import json
 import re
 import os
 import subprocess
+import platform
 
+def to_unix_path(path):
+    return path.replace('\\', '/')
+
+def normalize_utf8_path(path, index):
+    dir = os.path.split(path)[0]
+    ext = os.path.splitext(path)[1]
+    new_path = os.path.join(dir, str(index) + ext)
+    return new_path
 
 def unzip_package(file_path, out_dir, seven_zip_path=None):
     if not seven_zip_path:
-        seven_zip_path = './lib/7z-mac/7z'
+        os_name = platform.system().lower()
+        if os_name == "darwin":
+            seven_zip_path = './lib/7z-mac/7z'
+        elif os_name == "windows":
+            seven_zip_path = '.\\lib\\7z-win\\7z.exe'
+        else:
+            seven_zip_path = '7z'
 
-    with open(file_path, 'rb') as f:
-        ret = subprocess.call([seven_zip_path, 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
+    ret = subprocess.call([seven_zip_path, 'x', file_path, "-o" + out_dir], stdout=open(os.devnull, 'w'))
     return ret
 
 def to_absolute_path(basePath, relativePath):
@@ -43,15 +58,6 @@ def deep_iterate_dir(rootDir, callback, to_iter=True):
             if callback(path, False):
                 return True
     return False
-
-def re_test(args, path_in_apk):
-    if args:
-        for f in args:
-            f = '^' + f + '$'
-            if re.search(f, path_in_apk):
-                return True
-    return False
-
 
 def result_csv_output(result, output_path):
     import csv

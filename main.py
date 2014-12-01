@@ -64,11 +64,11 @@ def main():
 
         if len(e["error_info"]) > 0:
             for err in e["error_info"]:
-                str += ", error info: " + err
+                str += ", error info: " + err + ", "
 
         str += "matched:" + e["matched_content_file_name"]
 
-        print(str)
+        print(str.encode('utf-8'))
 
 if __name__ == '__main__':
     try:
