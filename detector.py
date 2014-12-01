@@ -6,7 +6,6 @@ import re
 
 TAG = "GameEngineDetector: "
 
-
 class PackageScanner:
     def __init__(self, workspace, engines, file_name):
         self.result = None
@@ -15,11 +14,12 @@ class PackageScanner:
         self.file_name = file_name
         self.prev_engine_name = None
         self._reset_result()
-        return
+
 
     def unzip_package(self, pkg_path, out_dir, seven_zip_path):
 
         ret = common.unzip_package(pkg_path, out_dir, seven_zip_path)
+
         if 0 != ret:
             print("==> ERROR: unzip package ( %s ) failed!" % self.file_name)
             self.result["error_info"].append("Unzip package failed")
@@ -67,7 +67,7 @@ class PackageScanner:
 
     def check_file_name(self, path):
         found = False
-
+        path = common.to_unix_path(path)
         for engine in self.engines:
             #print("==> Checking whether the game is made by " + engine["name"])
 
@@ -126,6 +126,7 @@ class GameEngineDetector:
         "Constructor"
 
         self.workspace = workspace
+        self.package_index = 0
         self.opts = opts
         self.all_results = []
 
@@ -149,7 +150,8 @@ class GameEngineDetector:
 
     def _need_to_check_file_content(self, path):
         "Check whether the file is an executable file"
-
+        path = common.to_unix_path(path)
+        
         for k in self.no_need_to_check_file_content:
             m = re.search(k, path)
             if m:
@@ -166,29 +168,48 @@ class GameEngineDetector:
     def _scan_package(self, pkg_path):
 
         file_name = os.path.split(pkg_path)[-1]
-        print("==> Scanning package ( %s )" % file_name)
+
+        print("==> Scanning package ( %s )" % file_name.encode('utf-8'))
         print("==> Unzip package ...")
         out_dir = os.path.join(self.temp_dir, file_name)
-        os.mkdir(out_dir)
 
         scanner = PackageScanner(self.workspace, self.engines, file_name)
 
-        if 0 == scanner.unzip_package(pkg_path, out_dir, self.opts["7z_path"]):
-            def callback(path, is_dir):
-                if is_dir:
+        # FIXME: rename the file path to avoid to use utf8 encoding string since 7z.exe on windows will complain.
+        new_pkg_path = common.normalize_utf8_path(pkg_path, self.package_index)
+
+        if new_pkg_path != pkg_path:
+            os.rename(pkg_path, new_pkg_path)
+
+        new_out_dir = common.normalize_utf8_path(out_dir, self.package_index)
+        os.mkdir(new_out_dir)
+
+        try:
+            if 0 == scanner.unzip_package(new_pkg_path, new_out_dir, self.opts["7z_path"]):
+                def callback(path, is_dir):
+                    if is_dir:
+                        return False
+
+                    scanner.check_file_name(path)
+
+                    if self._need_to_check_file_content(path):
+                        if scanner.check_file_content(path):
+                            return True
+
                     return False
 
-                scanner.check_file_name(path)
+                common.deep_iterate_dir(new_out_dir, callback)
 
-                if self._need_to_check_file_content(path):
-                    if scanner.check_file_content(path):
-                        return True
+            self.all_results.append(scanner.result)
+            if pkg_path != new_pkg_path:
+                os.rename(new_pkg_path, pkg_path)
 
-                return False
+        except Exception as e:
+            if pkg_path != new_pkg_path:
+                os.rename(new_pkg_path, pkg_path)
+            raise Exception(e)
 
-            common.deep_iterate_dir(out_dir, callback)
-
-        self.all_results.append(scanner.result)
+        self.package_index += 1
 
         return
 
