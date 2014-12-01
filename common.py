@@ -59,15 +59,6 @@ def deep_iterate_dir(rootDir, callback, to_iter=True):
                 return True
     return False
 
-def re_test(args, path_in_apk):
-    if args:
-        for f in args:
-            f = '^' + f + '$'
-            if re.search(f, path_in_apk):
-                return True
-    return False
-
-
 def result_csv_output(result, output_path):
     import csv
 
