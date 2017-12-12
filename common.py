@@ -66,6 +66,7 @@ def result_csv_output(result, output_path):
         csv_writer = csv.writer(f, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(["File",
                              "Engine",
+                             "EngineVersion",
                              "Subtypes",
                              "matched_content_file_name",
                              "matched_content_keywords"])
@@ -74,12 +75,14 @@ def result_csv_output(result, output_path):
                 engine = ", ".join(e["error_info"])
             else:
                 engine = e["engine"]
+                engine_version = e["engine_version"]
 
             sub_types = ", ".join(e["sub_types"])
             matched_content_keywords = ",".join(e["matched_content_keywords"])
 
             csv_writer.writerow([e["file_name"].encode("utf-8"),
                                  engine.encode("utf-8"),
+                                 engine_version.encode("utf-8"),
                                  sub_types.encode("utf-8"),
                                  e["matched_content_file_name"].encode("utf-8"),
                                  matched_content_keywords.encode("utf-8")])
