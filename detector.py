@@ -86,7 +86,7 @@ class PackageScanner:
         #print("==> Checking executable file ( %s )" % path)
 
         found = False
-
+        found_engine = None
         for engine in self.engines:
             #print("==> Checking whether the game is made by " + engine["name"])
 
@@ -97,12 +97,28 @@ class PackageScanner:
                         ret = self._check_chunk(path, chunk, engine)
                         if not found and ret:
                             found = True
+                            found_engine = engine
                     else:
                         break
 
             if found:
                 print("RESULT: " + str(self.result))
                 break
+
+        # Check engine version
+        if found:
+            # Re-open so file
+            if 'engine_version_keyword' in found_engine and path.endswith('.so'):
+                engine_version_keyword = found_engine['engine_version_keyword']
+                with open(path, "rb") as f:
+                    while True:
+                        chunk = f.read(chunk_size)
+                        if chunk:
+                            matched = re.search(engine_version_keyword, chunk)
+                            if matched:
+                                self.result['engine_version'] = matched.group(1)
+                        else:
+                            break
 
         return found
 
@@ -111,6 +127,7 @@ class PackageScanner:
         self.result = {
             "file_name": self.file_name,
             "engine": "unknown",
+            "engine_version": "unknown",
             "matched_file_name_keywords": set(),
             "matched_content_file_name": "",
             "matched_content_keywords": set(),
