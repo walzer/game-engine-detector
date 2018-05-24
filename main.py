@@ -3,72 +3,50 @@ import sys
 import os
 import traceback
 
-import common
-import detector
-
+# import common
+# import detector
+import WxapkgUnpacker
+import WxapkgDetector
 
 def main():
-    print("main entry!")
+    # print("main entry!")
 
     workspace = os.getcwd()
-    print("workspace: " + workspace)
+    # print("workspace: " + workspace)
 
-    from optparse import OptionParser
+    # get the list of wxapkg
+    path_packages = "wxapkg"  # to be fixed, should not hard code here
+    list_wxapkg = os.listdir(path_packages)
 
-    parser = OptionParser(usage="./main.py -o csv_path")
+    # the the full path
+    for i in range(0, len(list_wxapkg)):
+        list_wxapkg[i] = workspace + "/" + path_packages + "/" + list_wxapkg[i]
 
-    parser.add_option("-c", "--configfile",
-                      action="store", type="string", dest="config_file", default=None,
-                      help="The config file path")
+    # unpack all the wxapkgs
+    for i in list_wxapkg:
+        WxapkgUnpacker.run(i)
 
-    parser.add_option("-z", "--zip",
-                      action="store", type="string", dest="seven_zip_path", default=None,
-                      help="7z path")
+    # detect game.js
+    list_unpacked_wxapkg = os.listdir("wxapkgs_unpacked")
+    
+    engine = {}
+    engine['cocos'] = 0
+    engine['laya'] = 0
+    engine['egret'] = 0
+    engine['others'] = 0
 
-    parser.add_option("-p", "--pkg-dir",
-                      action="store", type="string", dest="pkg_dir", default=None,
-                      help="Directory that contains packages")
+    for i in list_unpacked_wxapkg:
+        ret = WxapkgDetector.run(workspace + "/wxapkgs_unpacked/" + i + "/game.js")
+        if (ret != "null"):
+            engine[ret] += 1
 
-    parser.add_option("-o", "--out-file",
-                      action="store", type="string", dest="out_file", default=None,
-                      help="The result file")
+    # calculate total number of wxapkgs
+    engine['total'] = engine['cocos'] + engine['laya'] + engine['egret'] + engine['others']
 
-    (opts, args) = parser.parse_args()
+    # dump
+    for i in engine.keys():
+        print("%s = %d, percentage = %.2f%%" % (i, engine[i], 100 * float(engine[i]) / float(engine['total'])))
 
-    if opts.config_file is None:
-        opts.config_file = "config.json"
-
-    cfg = common.read_object_from_json_file(opts.config_file)
-
-    cfg["7z_path"]= opts.seven_zip_path
-
-    if opts.pkg_dir is not None:
-        cfg["package_dirs"]= [opts.pkg_dir.decode("utf-8")]
-
-    d = detector.GameEngineDetector(workspace, cfg)
-    d.run()
-    r = d.get_all_results()
-
-    out_file_name = os.path.join(workspace, "result.csv")
-
-    if opts.out_file:
-        out_file_name = opts.out_file
-
-    common.result_csv_output(r, out_file_name)
-
-    for e in r:
-        str = "package: " + e["file_name"] + ", engine: " + e["engine"] + ", version: " + e["engine_version"] + ", "
-        if e["sub_types"]:
-            for sub_type in e["sub_types"]:
-                str += "subtype: " + sub_type + ", "
-
-        if len(e["error_info"]) > 0:
-            for err in e["error_info"]:
-                str += ", error info: " + err + ", "
-
-        str += "matched:" + e["matched_content_file_name"]
-
-        print(str.encode('utf-8'))
 
 if __name__ == '__main__':
     try:
