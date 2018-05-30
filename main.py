@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import os.path
 import traceback
 import re
 
@@ -14,33 +15,32 @@ def main():
     engines['others'] = 0
     index = 0
 
-    # get the path to wxapkg
+    # get the path to wxapkgs, use "{workspace}/wxapkg" as default
     if len(sys.argv) < 2:
-        print 'usage: python main.py {path_to_wxapkgs}'
-        exit()
-    
-    path_packages = sys.argv[1]
+        path_to_wxapkgs_dir = "wxapkg"
+    else:
+        path_to_wxapkgs_dir = sys.argv[1]
+
     workspace = os.getcwd()
 
-    # get the list of wxapkg
-    list_wxapkg = os.listdir(path_packages)
+    # get the list of wxapkgs
+    list_of_wxapkgs = os.listdir(path_to_wxapkgs_dir)
 
-    # the the full path
-    for i in range(0, len(list_wxapkg)):
-        list_wxapkg[i] = workspace + "/" + path_packages + "/" + list_wxapkg[i]
-
-
-
-    # unpack all the wxapkgs
-    for i in list_wxapkg:
-
-        # skip .DS_Store on mac
-        if (".DS_Store" == os.path.basename(i)):
+    # read and detect all the wxapkgs
+    for i in list_of_wxapkgs:
+                
+        # skip any other files whos extension is not ".wxapkg"
+        ext = os.path.splitext(i)[1]
+        if ( ".wxapkg" == ext ):
+            # set the full path
+            full_path_wxapkg = workspace + "/" + path_to_wxapkgs_dir + "/" + i
+        else:
+            print("%s isn't a wxapkg." % i)
             continue
 
         # read the .wxapkg file content
-        f = open(i, 'rb')
-        content_size = os.path.getsize(i)
+        f = open(full_path_wxapkg, 'rb')
+        content_size = os.path.getsize(full_path_wxapkg)
         content = f.read(content_size)
 
         # continue if this wxapkg doesn't has a "game.js" as a main entry file
@@ -48,53 +48,41 @@ def main():
             print("%s doesn't have game.js" % i)
             f.close()
             continue
-        
+
+        # start game engine detection        
         index += 1
-        is_cocos = ( None != re.search("cocos", content) )
-        is_laya  = ( None != re.search("laya",  content) )
-        is_egret = ( None != re.search("egret", content) )
 
-        # conflicts such as "playable", "REGERT", "playAnimation" etc.
-        if (is_cocos + is_egret + is_laya > 1):
-            # use re.findall
-            count_cocos = len( re.findall("cocos", content) )
-            count_laya  = len( re.findall("laya",  content) )
-            count_egret = len( re.findall("egret", content) )
-            count_max   = max(count_cocos, count_egret, count_laya)
+        # use re.findall instead of re.search to avoid words like "playable, playanimation, regret"
+        count_cocos = len( re.findall("cocos", content) ) - len( re.findall("[a-zA-Z]cocos", content )) - len( re.findall("cocos[a-zA-Z]", content ))
+        count_laya  = len( re.findall("laya",  content) ) - len( re.findall("[a-zA-Z]laya", content )) - len( re.findall("laya[a-zA-Z]", content ))
+        count_egret = len( re.findall("egret", content) ) - len( re.findall("[a-zA-Z]egret", content)) - len( re.findall("egret[a-zA-Z]", content ))
+        
+        # some pkgs has "playable" but doesn't use laya, or has "regret" but doesn't use egret
+        count_cocos = max (0, count_cocos)
+        count_laya = max (0, count_laya)
+        count_egret = max (0, count_egret)
+        
+        # who wins?
+        count_max   = max( count_cocos, count_egret, count_laya )
 
-            if (count_cocos == count_egret or
-                count_laya  == count_egret  or
-                count_egret == count_laya ):
-                print("CONFLICT: PLEASE DETECT %s MANUALLY." % i)
-            elif (count_max == count_egret):
-                is_cocos = 0
-                is_egret = 1
-                is_laya  = 0
-            elif (count_max == count_laya):
-                is_cocos = 0
-                is_egret = 0
-                is_laya  = 1
-            elif (count_max == count_cocos):
-                is_cocos = 1
-                is_egret = 0
-                is_laya  = 0
+        if ( count_max != ( count_cocos + count_egret + count_laya ) ):
+            print("WARNING: PLEASE DETECT %s MANUALLY. cocos %d, egret %d, laya %d" % (i, count_cocos, count_egret, count_laya))
 
-        if (is_cocos + is_laya + is_egret > 1):
-            print("STILL CONFLICT: %s" % i)
-        elif ( is_cocos + is_egret + is_laya == 0):
-            engines['others'] += 1
-            print("%s: others" % i)
-        elif (is_cocos):
-            engines['cocos'] += 1
-            print("%s: cocos" % i)
-        elif (is_laya):
-            engines['laya'] += 1
-            print("%s: laya" % i)
-        elif (is_egret):
-            engines['egret'] += 1
-            print("%s: egret" % i)
+        if ( 0 == count_max ):
+            result = "others"
+        elif (count_max == count_egret):
+            result = "egret"
+        elif (count_max == count_laya):
+            result = "laya"
+        elif (count_max == count_cocos):
+            result = "cocos"
         else:
-            print("WTF??")
+            result = "WTF??"
+
+        engines[result] += 1
+        print("[%d] %s: \t%s\t [cocos:%4d, egret %4d, laya %4d]" % (index, i, result, count_cocos, count_egret, count_laya))
+
+        f.close()
     # end of for list_wxapkg
 
     # calculate total number of wxapkgs
