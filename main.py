@@ -29,7 +29,7 @@ def main():
     # read and detect all the wxapkgs
     for i in list_of_wxapkgs:
                 
-        # skip any other files whos extension is not ".wxapkg"
+        # skip any other files whose extension is not ".wxapkg"
         ext = os.path.splitext(i)[1]
         if ( ".wxapkg" == ext ):
             # set the full path
