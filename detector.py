@@ -61,6 +61,7 @@ class PackageScanner:
                     self.result["sub_types"].add(k)
                     self.result["matched_sub_type_keywords"].add(keyword)
                     ret = True
+                    break
 
         return ret
 
