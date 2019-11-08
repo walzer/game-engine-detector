@@ -45,7 +45,8 @@
             {
                 "lua": ["CCLuaEngine", "LuaEngine"],
                 "js": ["ScriptingCore"],
-                "CocosCreator": ["Scale9SpriteV2"]
+                "CocosCreator 1.x": ["Scale9SpriteV2"],
+                "CocosCreator 2.x": ["EventDispatcher"]
             },
             "engine_version_keyword": "\\0cocos2d-x[\\s-](\\d+\\..*?)\\0"
         },
