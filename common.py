@@ -19,7 +19,7 @@ def unzip_package(file_path, out_dir, seven_zip_path=None):
     if not seven_zip_path:
         os_name = platform.system().lower()
         if os_name == "darwin":
-            seven_zip_path = './lib/7z-mac/7z'
+            seven_zip_path = './lib/7z-mac/7zz'
         elif os_name == "windows":
             seven_zip_path = '.\\lib\\7z-win\\7z.exe'
         else:
@@ -73,6 +73,7 @@ def result_csv_output(result, output_path):
         for e in result:
             if len(e["error_info"]) > 0:
                 engine = ", ".join(e["error_info"])
+                engine_version = "UNKNOWN"
             else:
                 engine = e["engine"]
                 engine_version = e["engine_version"]
